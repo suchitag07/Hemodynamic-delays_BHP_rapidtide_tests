@@ -22,22 +22,6 @@ We have been working with 3T resting-state scans (5 min, TR = 0.46 s, MB factor 
   - This voxel-wise search window is intentionally conservative to avoid selecting delays near spurious/'sidelobe'peaks (which arise through 'autocorrelation' in our reference sLFO). 
   - However, after despeckling completes, this modified search window persists and effectively overwrites the global search range (eg -5s to 40s --> drifts down to -1s to 6s) severely restricting the set of allowable delays. This leads to widespread fit failures (`initlaghigh`, `fitlaghigh`) and, ultimately, empty maps.
 
-### Solution/Outcome
-
-- ***Important note: The observed failure pattern was driven by how `lagmin`/`lagmax` drifted during voxel-wise despeckling (which I tracked). In some cases, this resulted in a ~20% fit failure rate (manageable), but in many cases it rose to ~70% ([problematic](https://gist.github.com/suchitag07/cb6e6b1395bc52ab35c16c499edd798b#replication-of-prepost-bug-fix-output-with-revised-command)).***
-- To fix this, I reset the search window to the original user-defined values immediately after the despeckling routine is executed in the code. This resoved the issue!
-- This bug-fix was reviwed and merged into the latest release of [rapidtide version 3.1.11](https://github.com/bbfrederick/rapidtide/releases/tag/v3.1.11)
-
-### [Jump to Pre/Post-Fix Outputs here](https://gist.github.com/suchitag07/cb6e6b1395bc52ab35c16c499edd798b#replication-of-prepost-bug-fix-output-with-revised-command)
-
-***
-
-## Code/Troubleshooting Process: Summary
-
-### Problem Example Case
-- Lags beyond +/-8s were being flagged as outliers despite a broad user-defined search range of 
-`[-5:40]` ([see example case and initial test command](https://gist.github.com/suchitag07/cb6e6b1395bc52ab35c16c499edd798b#Initial-test-command)). This was showing up as a high proportion of fit failures in our logs (`initlaghigh, fitlaghigh`). 
-
 ### Relevant Functions/Calls
 ```
 1) `rapidtide.py` (initializes `theFitter` object which holds user defined parameters)
@@ -60,19 +44,13 @@ We have been working with 3T resting-state scans (5 min, TR = 0.46 s, MB factor 
   - Once this window is updated, the ***new*** `lagmin` and `lagmax` persist, essentially mutating the global window (`theFitter`) that is used across passes.
 - This causes the global range to drift from the starting/user defined `[-5, 40]` to about `[-9.1, 8.14]` (in our example case). Pass 2 then starts with this narrowed window, true long-lag voxels get systematically flagged as `FITLAGHIGH` and clipped/no longer eligible for despeckling (fall below that threshold).
 
-### Minimal patch
-- I attempted a small patch in `fitSimFuncMap.py line 970-973`, that resets the lagmin and lagmax to the user specifed window after `fitcorr` is called.
 
-```
-global_lagmin = optiondict["lagmin"]
-global_lagmax = optiondict["lagmax"]
-theFitter.setrange(global_lagmin, global_lagmax)
-```
-### Outcome
-- This worked! It restored the global fitter window to `[-5, 40]` while leaving the internal despeckling behavior unchanged (`initiallag` values and `numdespeckled` were unchanged). With this patch, passes2+> used the full search range, long delays (~15 s in lesion/infarct territory) were recovered, and high-lag failures occured only at the true 40 s boundary rather than at an unintended ~8 s ceiling.
+### Solution/Outcome
 
-#### [Initial Test Command Pre/Post-Fix](https://gist.github.com/suchitag07/cb6e6b1395bc52ab35c16c499edd798b#example-1)
+- ***Important note: The observed failure pattern was driven by how `lagmin`/`lagmax` drifted during voxel-wise despeckling (which I tracked). In some cases, this resulted in a ~20% fit failure rate (manageable), but in many cases it rose to ~70% ([problematic](https://gist.github.com/suchitag07/cb6e6b1395bc52ab35c16c499edd798b#replication-of-prepost-bug-fix-output-with-revised-command)).***
+- To fix this, I reset the search window to the original user-defined values immediately after the despeckling routine is executed in the code. This resoved the issue!
+- This bug-fix was reviwed and merged into the latest release of [rapidtide version 3.1.11](https://github.com/bbfrederick/rapidtide/releases/tag/v3.1.11)
+
+***Detailed debugging log can be found here***: https://gist.github.com/suchitag07/cb6e6b1395bc52ab35c16c499edd798b
 
 ***
-
-## Detailed debugging log can be found here: https://gist.github.com/suchitag07/cb6e6b1395bc52ab35c16c499edd798b
