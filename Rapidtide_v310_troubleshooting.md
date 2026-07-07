@@ -48,9 +48,14 @@ We have been working with 3T resting-state scans (5 min, TR = 0.46 s, MB factor 
 ### Solution/Outcome
 
 - ***Important note: The observed failure pattern was driven by how `lagmin`/`lagmax` drifted during voxel-wise despeckling (which I tracked). In some cases, this resulted in a ~20% fit failure rate (manageable), but in many cases it rose to ~70% ([problematic](https://gist.github.com/suchitag07/cb6e6b1395bc52ab35c16c499edd798b#replication-of-prepost-bug-fix-output-with-revised-command)).***
-- To fix this, I reset the search window to the original user-defined values immediately after the despeckling routine is executed in the code. This resoved the issue!
+- To fix this, I reset the search window to the original user-defined values immediately after the despeckling routine is executed in the code `fitSimFuncMap.py line 970-973 theFitter.setrange(optiondict["lagmin"], optiondict["lagmax"])`. This resoved the issue!
 - This bug-fix was reviwed and merged into the latest release of [rapidtide version 3.1.11](https://github.com/bbfrederick/rapidtide/releases/tag/v3.1.11)
 
 ***Detailed debugging log can be found here***: https://gist.github.com/suchitag07/cb6e6b1395bc52ab35c16c499edd798b
 
+![](https://github.com/user-attachments/assets/5307a29f-5f87-41b1-8ac4-409b759ea77d)
+
+![](https://github.com/user-attachments/assets/ebe7f3ca-c426-40ec-879b-324865d30d62)
+
+![](https://github.com/user-attachments/assets/892dfe89-be93-4186-b8c8-0e97fd27d5b4)
 ***
