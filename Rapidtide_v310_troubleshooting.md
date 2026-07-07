@@ -53,6 +53,33 @@ We have been working with 3T resting-state scans (5 min, TR = 0.46 s, MB factor 
 
 ***Detailed debugging log can be found here***: https://gist.github.com/suchitag07/cb6e6b1395bc52ab35c16c499edd798b
 
+***Example Rapidtide Call***
+```
+rapidtide \
+	/path_to_data/fmriprep/sub-${subjID}/ses-01/func/sub-${subjID}_ses-01_task-rest_desc-preproc_bold.nii.gz \
+	/path_to_data/latest/Rapidtideout/Bug_test_SG/sub-${subjID}/sub-${subjID}
+	--numnull 10000 \
+	--filterband lfo \
+	--preppass \
+	--sharpenregressor \
+	--searchrange -5 30 \
+	--passes 3 \
+	--nofitfilt \
+	--simcalcrange 130 -1 \
+	--corrmask /path_to_data/fmriprep/sub-${subjID}/ses-01/func/sub-${subjID}_ses-01_task-rest_desc-brain_mask.nii.gz \
+	--globalmeaninclude /path_to_data/fmriprep/sub-${subjID}/ses-01/fMRIPrep_parc_bold_space/sub-${subjID}_ses-01_task-rest_space-bold_desc-aparcaseg.nii.gz:8,47 \
+	--refineinclude /path_to_data/fmriprep/sub-${subjID}/ses-01/fMRIPrep_parc_bold_space/sub-${subjID}_ses-01_task-rest_space-bold_desc-aparcaseg.nii.gz:8,47 \
+	--whitemattermask /path_to_data/fmriprep/sub-${subjID}/ses-01/fMRIPrep_parc_bold_space/sub-${subjID}_ses-01_task-rest_space-bold_desc-WM_probseg_bin.nii.gz \
+	--csfmask /path_to_data/fmriprep/sub-${subjID}/ses-01/fMRIPrep_parc_bold_space/sub-${subjID}_ses-01_task-rest_space-bold_desc-CSF_probseg_bin.nii.gz \
+	--motionfile /path_to_data/fmriprep/sub-${subjID}/ses-01/func/sub-${subjID}_ses-01_task-rest_desc-confounds-trimmed_timeseries_revised_final.tsv \
+	--motpowers 2 \
+	--mklthreads 1 \
+	--nprocs 1 \
+	--numskip 0 \
+	--outputlevel max
+```
+
+
 ![](https://github.com/user-attachments/assets/5307a29f-5f87-41b1-8ac4-409b759ea77d)
 
 ![](https://github.com/user-attachments/assets/ebe7f3ca-c426-40ec-879b-324865d30d62)
